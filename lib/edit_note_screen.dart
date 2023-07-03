@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EditNoteScreen extends StatefulWidget {
@@ -11,6 +12,8 @@ class EditNoteScreen extends StatefulWidget {
 
 class _EditNoteScreenState extends State<EditNoteScreen> {
   final editnoteController = TextEditingController();
+  final firestore = FirebaseFirestore.instance;
+
 
   @override
   void initState() {
@@ -42,10 +45,9 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-            String note = editnoteController.text;
+          String note = editnoteController.text;
           Navigator.pop(
             context,
-            note
           );
         },
         child: const Icon(

@@ -222,14 +222,19 @@ class _NotesScreenState extends State<NotesScreen> {
                 },
                 icon: const Icon(
                   Icons.edit,
-                  color: Colors.teal,
+                  color: Colors.black38,
                 ),
               ),
               IconButton(
-                onPressed: () => deleteNote(index),
+                onPressed: () async {
+                  final result = await confirmDialog(context);
+                  if (result != null && result) {
+                    deleteNote(index);
+                  }
+                  },
                 icon: const Icon(
                   Icons.delete,
-                  color: Colors.red,
+                  color: Colors.black38,
                 ),
               ),
             ],
@@ -241,7 +246,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   void navigateToAddNewNoteScreen() {
     Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => AddNewNoteScreen()))
+        .push(MaterialPageRoute(builder: (context) => const AddNewNoteScreen()))
         .then((value) {
       getNotesFromFire();
     });
@@ -267,5 +272,56 @@ class _NotesScreenState extends State<NotesScreen> {
     await firestore.collection('notes').doc(notes[index]['id']).delete();
     notes.removeAt(index);
     setState(() {});
+  }
+
+  confirmDialog(BuildContext context) {
+    return showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+        backgroundColor: Colors.grey.shade900,
+        icon: const Icon(
+          Icons.info,
+          color: Colors.grey,
+        ),
+        title: const Text(
+          'Are you sure you want to delete?',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green),
+                child: const SizedBox(
+                  width: 60,
+                  child: Text(
+                    'Yes',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                )
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                style:
+                ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const SizedBox(
+                  width: 60,
+                  child: Text(
+                    'No',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                )
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

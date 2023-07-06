@@ -1,14 +1,17 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:notesscreen/add_new_note_screen.dart';
+import 'package:notesscreen/constants/colors.dart';
 import 'package:notesscreen/edit_note_screen.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-  );
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -19,8 +22,22 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme:
-      ThemeData(primarySwatch: Colors.indigo, brightness: Brightness.dark),
+      theme: ThemeData(
+        primarySwatch: MaterialColor(Colors.grey.shade900.value, {
+          50: Colors.grey.shade50,
+          100: Colors.grey.shade100,
+          200: Colors.grey.shade200,
+          300: Colors.grey.shade300,
+          400: Colors.grey.shade400,
+          500: Colors.grey.shade500,
+          600: Colors.grey.shade600,
+          700: Colors.grey.shade700,
+          800: Colors.grey.shade800,
+          900: Colors.grey.shade900
+        }),
+        textTheme: GoogleFonts.josefinSansTextTheme(),
+        scaffoldBackgroundColor: Colors.grey[900],
+      ),
       home: const NotesScreen(),
     );
   }
@@ -36,12 +53,19 @@ class NotesScreen extends StatefulWidget {
 class _NotesScreenState extends State<NotesScreen> {
   final List<Map<String, dynamic>> notes = [];
   final firestore = FirebaseFirestore.instance;
+  bool isVisible = false;
+
+  getRandomColor() {
+    Random random = Random();
+    return backgroundColors[random.nextInt(backgroundColors.length)];
+  }
 
   @override
   void initState() {
     super.initState();
     getNotesFromFire();
   }
+
 
   void getNotesFromFire() {
     firestore.collection('notes').get().then((value) {
@@ -50,8 +74,7 @@ class _NotesScreenState extends State<NotesScreen> {
         final note = document.data();
         notes.add(note);
       }
-      setState(() {
-      });
+      setState(() {});
     });
   }
 
@@ -59,84 +82,177 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            "Notes",
+        title: const Text(
+          "Notes",
+        ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                setState(() {
+                });
+              },
+              padding: const EdgeInsets.all(0),
+              icon: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade800.withOpacity(.8),
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Icon(
+                  Icons.sort,
+                  color: Colors.white,
+                ),
+              ))
+        ],
+      ),
+      floatingActionButton: Visibility(
+        visible: isVisible,
+        child: FloatingActionButton(
+          onPressed: () {
+            navigateToAddNewNoteScreen();
+          },
+          elevation: 0,
+          backgroundColor: Colors.grey.shade800,
+          foregroundColor: Colors.white,
+          child: Container(
+            height: 70,
+            width: 70,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: const BorderRadius.all(Radius.circular(50)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.2),
+                  spreadRadius: 3,
+                  blurRadius: 3,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.add,
+              size: 32,
+            ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          navigateToAddNewNoteScreen();
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.direction == ScrollDirection.forward) {
+            if(!isVisible) setState(() => isVisible = true);
+          } else if (notification.direction == ScrollDirection.reverse) {
+            if(isVisible) setState(() => isVisible = false);
+          }
+          return true;
         },
-        child: const Icon(
-          Icons.add,
-          color: Colors.black,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 5,
+              ),
+              TextField(
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  hintText: "Search notes...",
+                  hintStyle: const TextStyle(color: Colors.grey),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Colors.grey,
+                  ),
+                  fillColor: Colors.grey.shade800,
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Colors.transparent),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(color: Colors.transparent),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 13,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: notes.length,
+                  itemBuilder: (context, index) {
+                    return noteItem(index);
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      body: ListView.builder(
-        itemCount: notes.length,
-        itemBuilder: (context, index) {
-          return noteItem(index);
-        },
       ),
     );
   }
 
   Widget noteItem(int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white12,
-        borderRadius: BorderRadius.circular(26),
-      ),
-      margin: const EdgeInsets.all(15),
-      padding: const EdgeInsets.all(15),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              notes[index]['note'],
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Card(
+        color: getRandomColor(),
+        margin: const EdgeInsets.only(bottom: 10),
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  notes[index]['note'],
+                  style: GoogleFonts.josefinSans(
+                    fontSize: 18,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
               ),
-            ),
+              IconButton(
+                onPressed: () {
+                  navigateToEditNewNoteScreen(index);
+                },
+                icon: const Icon(
+                  Icons.edit,
+                  color: Colors.teal,
+                ),
+              ),
+              IconButton(
+                onPressed: () => deleteNote(index),
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: () {
-              navigateToEditNewNoteScreen(index);
-            },
-            icon: const Icon(
-              Icons.edit,
-              color: Colors.green,
-            ),
-          ),
-          IconButton(
-            onPressed: () => deleteNote(index),
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.red,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   void navigateToAddNewNoteScreen() {
-    Navigator.of(
-        context
-    ).push(MaterialPageRoute(builder: (context) => AddNewNoteScreen()))
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => AddNewNoteScreen()))
         .then((value) {
-          getNotesFromFire();
+      getNotesFromFire();
     });
   }
 
   void navigateToEditNewNoteScreen(int index) {
-    Navigator.of(
-        context
-    ).push(MaterialPageRoute(
-        builder: (context) => EditNoteScreen(note: notes[index]['note'],)))
+    Navigator.of(context)
+        .push(MaterialPageRoute(
+            builder: (context) => EditNoteScreen(
+                  note: notes[index]['note'],
+                )))
         .then((value) {
       if (value == null) {
         return;
@@ -152,6 +268,4 @@ class _NotesScreenState extends State<NotesScreen> {
     notes.removeAt(index);
     setState(() {});
   }
-
 }
-

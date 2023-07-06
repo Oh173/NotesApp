@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-
 class AddNewNoteScreen extends StatefulWidget {
   const AddNewNoteScreen({Key? key}) : super(key: key);
 
@@ -22,15 +21,27 @@ class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
       ),
       body: Column(
         children: [
+          const SizedBox(
+            height: 30,
+          ),
           Padding(
-            padding: const EdgeInsets.all(17),
+            padding: const EdgeInsets.all(20),
             child: TextFormField(
+              style: const TextStyle(fontWeight: FontWeight.bold),
               controller: noteController,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                filled: true,
+                fillColor: Colors.white,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white),
+                  borderRadius: BorderRadius.circular(25.7),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white),
+                  borderRadius: BorderRadius.circular(25.7),
                 ),
                 hintText: 'Note',
+                hintStyle: const TextStyle(color: Colors.black),
               ),
             ),
           ),
@@ -38,8 +49,27 @@ class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => addNote(),
-        child: const Icon(
-          Icons.save,
+        backgroundColor: Colors.grey.shade800,
+        foregroundColor: Colors.white,
+        child: Container(
+          height: 70,
+          width: 70,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: const BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.2),
+                spreadRadius: 3,
+                blurRadius: 3,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.save,
+            size: 32,
+          ),
         ),
       ),
     );
@@ -50,13 +80,13 @@ class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
 
     String currentMillis = DateTime.now().microsecondsSinceEpoch.toString();
 
-    Map<String ,dynamic> data = {
-      'id' : currentMillis,
-      'note' : note,
+    Map<String, dynamic> data = {
+      'id': currentMillis,
+      'note': note,
     };
 
     firestore.collection('notes').doc(data['id']).set(data);
-    
+
     Navigator.pop(
       context,
     );

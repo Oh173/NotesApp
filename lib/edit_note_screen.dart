@@ -14,7 +14,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   final editnoteController = TextEditingController();
   final firestore = FirebaseFirestore.instance;
 
-
   @override
   void initState() {
     super.initState();
@@ -29,13 +28,24 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       ),
       body: Column(
         children: [
+          const SizedBox(
+            height: 30,
+          ),
           Padding(
-            padding: const EdgeInsets.all(17),
+            padding: const EdgeInsets.all(20),
             child: TextFormField(
+              style: const TextStyle(fontWeight: FontWeight.bold),
               controller: editnoteController,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                filled: true,
+                fillColor: Colors.white,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white),
+                  borderRadius: BorderRadius.circular(25.7),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.white),
+                  borderRadius: BorderRadius.circular(25.7),
                 ),
                 hintText: 'Note',
               ),
@@ -50,8 +60,27 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
             context,
           );
         },
-        child: const Icon(
-          Icons.update,
+        backgroundColor: Colors.grey.shade800,
+        foregroundColor: Colors.white,
+        child: Container(
+          height: 70,
+          width: 70,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: const BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.white.withOpacity(0.2),
+                spreadRadius: 3,
+                blurRadius: 3,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.update,
+            size: 32,
+          ),
         ),
       ),
     );

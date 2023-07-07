@@ -52,7 +52,7 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> {
   final List<Map<String, dynamic>> notes = [];
-  final firestore = FirebaseFirestore.instance;
+  final fireStore = FirebaseFirestore.instance;
   bool isVisible = false;
 
   getRandomColor() {
@@ -64,13 +64,24 @@ class _NotesScreenState extends State<NotesScreen> {
   void initState() {
     super.initState();
     getNotesFromFire();
+    // getNotesRealTimeFromFire();
   }
 
 
   void getNotesFromFire() {
-    firestore.collection('notes').get().then((value) {
+    fireStore.collection('notes').get().then((value) {
       notes.clear();
       for (var document in value.docs) {
+        final note = document.data();
+        notes.add(note);
+      }
+      setState(() {});
+    });
+  }
+  void getNotesRealTimeFromFire() {
+    fireStore.collection('notes').snapshots().listen((event) {
+      notes.clear();
+      for (var document in event.docs) {
         final note = document.data();
         notes.add(note);
       }
@@ -257,19 +268,20 @@ class _NotesScreenState extends State<NotesScreen> {
         .push(MaterialPageRoute(
             builder: (context) => EditNoteScreen(
                   note: notes[index]['note'],
-                )))
+                   id: notes[index]['id'],
+            )))
         .then((value) {
       if (value == null) {
         return;
       }
-      print(value);
+      //print(value);
       notes[index] = value;
       setState(() {});
     });
   }
 
   deleteNote(int index) async {
-    await firestore.collection('notes').doc(notes[index]['id']).delete();
+    await fireStore.collection('notes').doc(notes[index]['id']).delete();
     notes.removeAt(index);
     setState(() {});
   }
@@ -283,7 +295,7 @@ class _NotesScreenState extends State<NotesScreen> {
           color: Colors.grey,
         ),
         title: const Text(
-          'Are you sure you want to delete?',
+          'Are you sure you want to delete ?',
           style: TextStyle(color: Colors.white),
         ),
         content: Row(

@@ -2,22 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class EditNoteScreen extends StatefulWidget {
-  EditNoteScreen({Key? key, required this.note}) : super(key: key);
+  const EditNoteScreen({
+    Key? key,
+    required this.note,
+    required this.id,
+  }) : super(key: key);
 
   final String note;
+  final String id;
 
   @override
   State<EditNoteScreen> createState() => _EditNoteScreenState();
 }
 
 class _EditNoteScreenState extends State<EditNoteScreen> {
-  final editnoteController = TextEditingController();
-  final firestore = FirebaseFirestore.instance;
+  final editNoteController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    editnoteController.text = widget.note;
+    editNoteController.text = widget.note;
   }
 
   @override
@@ -35,7 +39,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
             padding: const EdgeInsets.all(20),
             child: TextFormField(
               style: const TextStyle(fontWeight: FontWeight.bold),
-              controller: editnoteController,
+              controller: editNoteController,
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
@@ -54,12 +58,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          String note = editnoteController.text;
-          Navigator.pop(
-            context,
-          );
-        },
+        onPressed: () => updateNote(),
         backgroundColor: Colors.grey.shade800,
         foregroundColor: Colors.white,
         child: Container(
@@ -84,5 +83,17 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         ),
       ),
     );
+  }
+
+  updateNote() {
+    String note = editNoteController.text;
+    final fireStore = FirebaseFirestore.instance;
+
+    Map<String, dynamic> data = {
+      'note': note,
+    };
+    fireStore.collection("notes").doc(widget.id).update(data);
+    Navigator.pop(context, note);
+    setState(() {});
   }
 }

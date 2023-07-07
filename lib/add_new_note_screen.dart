@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class AddNewNoteScreen extends StatefulWidget {
@@ -11,7 +10,7 @@ class AddNewNoteScreen extends StatefulWidget {
 
 class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
   final noteController = TextEditingController();
-  final firestore = FirebaseFirestore.instance;
+  final fireStore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,7 @@ class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
       'note': note,
     };
 
-    firestore.collection('notes').doc(data['id']).set(data);
+    fireStore.collection('notes').doc(data['id']).set(data);
 
     Navigator.pop(
       context,

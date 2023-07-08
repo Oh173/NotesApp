@@ -1,6 +1,6 @@
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,6 +8,7 @@ import 'package:notesscreen/add_new_note_screen.dart';
 import 'package:notesscreen/constants/colors.dart';
 import 'package:notesscreen/edit_note_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notesscreen/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,9 +16,14 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -38,8 +44,16 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.josefinSansTextTheme(),
         scaffoldBackgroundColor: Colors.grey[900],
       ),
-      home: const NotesScreen(),
+      home: navigateToScreen(),
     );
+  }
+
+  Widget navigateToScreen() {
+    if (FirebaseAuth.instance.currentUser == null) {
+      return const LoginScreen();
+    } else {
+      return const NotesScreen();
+    }
   }
 }
 
@@ -67,7 +81,6 @@ class _NotesScreenState extends State<NotesScreen> {
     // getNotesRealTimeFromFire();
   }
 
-
   void getNotesFromFire() {
     fireStore.collection('notes').get().then((value) {
       notes.clear();
@@ -78,6 +91,7 @@ class _NotesScreenState extends State<NotesScreen> {
       setState(() {});
     });
   }
+
   void getNotesRealTimeFromFire() {
     fireStore.collection('notes').snapshots().listen((event) {
       notes.clear();
@@ -98,22 +112,28 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
         actions: [
           IconButton(
-              onPressed: () {
-                setState(() {
-                });
-              },
-              padding: const EdgeInsets.all(0),
-              icon: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                    color: Colors.grey.shade800.withOpacity(.8),
-                    borderRadius: BorderRadius.circular(10)),
-                child: const Icon(
-                  Icons.sort,
-                  color: Colors.white,
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
                 ),
-              ))
+              );
+            },
+            padding: const EdgeInsets.all(0),
+            icon: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade800.withOpacity(.8),
+                  borderRadius: BorderRadius.circular(10)),
+              child: const Icon(
+                Icons.logout,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
       floatingActionButton: Visibility(
@@ -150,9 +170,9 @@ class _NotesScreenState extends State<NotesScreen> {
       body: NotificationListener<UserScrollNotification>(
         onNotification: (notification) {
           if (notification.direction == ScrollDirection.forward) {
-            if(!isVisible) setState(() => isVisible = true);
+            if (!isVisible) setState(() => isVisible = true);
           } else if (notification.direction == ScrollDirection.reverse) {
-            if(isVisible) setState(() => isVisible = false);
+            if (isVisible) setState(() => isVisible = false);
           }
           return true;
         },
@@ -242,7 +262,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   if (result != null && result) {
                     deleteNote(index);
                   }
-                  },
+                },
                 icon: const Icon(
                   Icons.delete,
                   color: Colors.black38,
@@ -268,8 +288,8 @@ class _NotesScreenState extends State<NotesScreen> {
         .push(MaterialPageRoute(
             builder: (context) => EditNoteScreen(
                   note: notes[index]['note'],
-                   id: notes[index]['id'],
-            )))
+                  id: notes[index]['id'],
+                )))
         .then((value) {
       if (value == null) {
         return;
@@ -287,53 +307,53 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   confirmDialog(BuildContext context) {
-    return showDialog(context: context, builder: (BuildContext context){
-      return AlertDialog(
-        backgroundColor: Colors.grey.shade900,
-        icon: const Icon(
-          Icons.info,
-          color: Colors.grey,
-        ),
-        title: const Text(
-          'Are you sure you want to delete ?',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green),
-                child: const SizedBox(
-                  width: 60,
-                  child: Text(
-                    'Yes',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.grey.shade900,
+            icon: const Icon(
+              Icons.info,
+              color: Colors.grey,
             ),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-                style:
-                ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const SizedBox(
-                  width: 60,
-                  child: Text(
-                    'No',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )
+            title: const Text(
+              'Are you sure you want to delete ?',
+              style: TextStyle(color: Colors.white),
             ),
-          ],
-        ),
-      );
-    });
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    child: const SizedBox(
+                      width: 60,
+                      child: Text(
+                        'Yes',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const SizedBox(
+                      width: 60,
+                      child: Text(
+                        'No',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    )),
+              ],
+            ),
+          );
+        });
   }
 }

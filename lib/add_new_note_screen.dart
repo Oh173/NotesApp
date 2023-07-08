@@ -11,6 +11,10 @@ class AddNewNoteScreen extends StatefulWidget {
 class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
   final noteController = TextEditingController();
   final fireStore = FirebaseFirestore.instance;
+  var border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: const BorderSide(color: Colors.white));
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,21 +30,13 @@ class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
           Padding(
             padding: const EdgeInsets.all(20),
             child: TextFormField(
-              style: const TextStyle(fontWeight: FontWeight.bold),
               controller: noteController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
-                  borderRadius: BorderRadius.circular(25.7),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
-                  borderRadius: BorderRadius.circular(25.7),
-                ),
                 hintText: 'Note',
-                hintStyle: const TextStyle(color: Colors.black),
+                hintStyle: const TextStyle(color: Colors.white),
+                enabledBorder: border,
+                focusedBorder: border,
               ),
             ),
           ),

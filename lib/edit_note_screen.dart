@@ -18,6 +18,10 @@ class EditNoteScreen extends StatefulWidget {
 class _EditNoteScreenState extends State<EditNoteScreen> {
   final editNoteController = TextEditingController();
 
+  var border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(18),
+      borderSide: const BorderSide(color: Colors.white));
+
   @override
   void initState() {
     super.initState();
@@ -38,20 +42,13 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
           Padding(
             padding: const EdgeInsets.all(20),
             child: TextFormField(
-              style: const TextStyle(fontWeight: FontWeight.bold),
               controller: editNoteController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
-                  borderRadius: BorderRadius.circular(25.7),
-                ),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: const BorderSide(color: Colors.white),
-                  borderRadius: BorderRadius.circular(25.7),
-                ),
                 hintText: 'Note',
+                hintStyle: const TextStyle(color: Colors.white),
+                enabledBorder: border,
+                focusedBorder: border,
               ),
             ),
           ),

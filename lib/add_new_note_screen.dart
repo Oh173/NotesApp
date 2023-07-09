@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class AddNewNoteScreen extends StatefulWidget {
@@ -75,9 +77,12 @@ class _AddNewNoteScreenState extends State<AddNewNoteScreen> {
 
     String currentMillis = DateTime.now().microsecondsSinceEpoch.toString();
 
+    String userId = FirebaseAuth.instance.currentUser!.uid;
+
     Map<String, dynamic> data = {
       'id': currentMillis,
       'note': note,
+      'userId' : userId,
     };
 
     fireStore.collection('notes').doc(data['id']).set(data);
